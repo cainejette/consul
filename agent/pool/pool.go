@@ -317,27 +317,6 @@ func (p *ConnPool) DialTimeout(
 	)
 }
 
-// DialTimeoutInsecure is used to establish a raw connection to the given
-// server, with given connection timeout. It also writes RPCTLSInsecure as the
-// first byte to indicate that the client cannot provide a certificate. This is
-// so far only used for AutoEncrypt.Sign.
-func (p *ConnPool) DialTimeoutInsecure(
-	dc string,
-	nodeName string,
-	addr net.Addr,
-	wrapper tlsutil.DCWrapper,
-) (net.Conn, HalfCloser, error) {
-	p.once.Do(p.init)
-
-	return p.dial(
-		dc,
-		nodeName,
-		addr,
-		RPCTLSInsecure,
-		RPCTLSInsecure,
-	)
-}
-
 func (p *ConnPool) dial(
 	dc string,
 	nodeName string,

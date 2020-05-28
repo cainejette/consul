@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/consul/agent/pool"
 	"github.com/hashicorp/consul/agent/structs"
 	"github.com/hashicorp/consul/testrpc"
-	"github.com/hashicorp/consul/tlsutil"
 	msgpackrpc "github.com/hashicorp/net-rpc-msgpackrpc"
 	"github.com/stretchr/testify/require"
 )
@@ -25,32 +24,6 @@ func rpcClient(t *testing.T, s *Server) rpc.ClientCodec {
 	// Write the Consul RPC byte to set the mode
 	conn.Write([]byte{byte(pool.RPCConsul)})
 	return msgpackrpc.NewCodecFromHandle(true, true, conn, structs.MsgpackHandle)
-}
-
-func insecureRPCClient(s *Server, c tlsutil.Config) (rpc.ClientCodec, error) {
-	addr := s.config.RPCAdvertise
-	configurator, err := tlsutil.NewConfigurator(c, s.logger)
-	if err != nil {
-		return nil, err
-	}
-	wrapper := configurator.OutgoingRPCWrapper()
-	if wrapper == nil {
-		return nil, err
-	}
-	conn, _, err := pool.DialTimeoutWithRPCTypeDirectly(
-		s.config.Datacenter,
-		s.config.NodeName,
-		addr,
-		nil,
-		time.Second,
-		wrapper,
-		pool.RPCTLSInsecure,
-		pool.RPCTLSInsecure,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return msgpackrpc.NewCodecFromHandle(true, true, conn, structs.MsgpackHandle), nil
 }
 
 func TestStatusLeader(t *testing.T) {

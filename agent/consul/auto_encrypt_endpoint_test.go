@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/consul/agent/structs"
 	"github.com/hashicorp/consul/testrpc"
 	"github.com/hashicorp/consul/tlsutil"
-	msgpackrpc "github.com/hashicorp/net-rpc-msgpackrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -91,16 +90,11 @@ func TestAutoEncryptSign(t *testing.T) {
 			cfg := test.Config
 			cfg.AutoEncryptTLS = true
 			cfg.Domain = "consul"
-			codec, err := insecureRPCClient(s, cfg)
-			if test.ConnError {
-				require.Error(t, err, info)
-				return
-			}
 
 			require.NoError(t, err, info)
 			var reply structs.SignedResponse
-			err = msgpackrpc.CallWithCodec(codec, "AutoEncrypt.Sign", args, &reply)
-			codec.Close()
+			err = s.connPool.RPC("dc1", s.config.NodeName, s.config.RPCAddr, "AutoEncrypt.Sign", args, &reply)
+			t.Log(err)
 			if test.RPCError {
 				require.Error(t, err, info)
 				return
