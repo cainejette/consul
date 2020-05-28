@@ -43,7 +43,6 @@ func insecureRPCClient(s *Server, c tlsutil.Config) (rpc.ClientCodec, error) {
 		addr,
 		nil,
 		time.Second,
-		true,
 		wrapper,
 		pool.RPCTLSInsecure,
 		pool.RPCTLSInsecure,
